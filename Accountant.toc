@@ -3,6 +3,11 @@
 ## Description: Logs your WoW incomings / outgoings
 ## DefaultState: enabled
 ## SavedVariables: Accountant_SaveData,Accountant_Options
+
+l10n\deDE.lua
+l10n\enUS.lua
+l10n\esES.lua
+l10n\frFR.lua
 Accountant.xml
 AccountantButton.xml
 AccountantOptions.xml

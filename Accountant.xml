@@ -5,10 +5,6 @@
 -->
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<Script file="localization.en.lua"/>
-	<Script file="localization.fr.lua"/>
-	<Script file="localization.de.lua"/>
-	<Script file="localization.es.lua"/>
 	<Script file="Accountant.lua"/>
 
 	<!-- Item Row Template -->
@@ -120,7 +116,7 @@
                 </Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture name="$parentTopLeft" file="Interface\AddOns\Accountant\AccountantFrame-TopLeft">
+				<Texture name="$parentTopLeft" file="Interface\AddOns\Accountant\img\AccountantFrame-TopLeft">
 					<Size>
 						<AbsDimension x="256" y="256"/>
 					</Size>
@@ -128,7 +124,7 @@
 						<Anchor point="TOPLEFT"/>
 					</Anchors>
 				</Texture>
-				<Texture name="$parentTopRight" file="Interface\AddOns\Accountant\AccountantFrame-TopRight">
+				<Texture name="$parentTopRight" file="Interface\AddOns\Accountant\img\AccountantFrame-TopRight">
 					<Size>
 						<AbsDimension x="128" y="256"/>
 					</Size>
@@ -136,7 +132,7 @@
 						<Anchor point="TOPRIGHT"/>
 					</Anchors>
 				</Texture>
-				<Texture name="$parentBotLeft" file="Interface\AddOns\Accountant\AccountantFrame-BotLeft">
+				<Texture name="$parentBotLeft" file="Interface\AddOns\Accountant\img\AccountantFrame-BotLeft">
 					<Size>
 						<AbsDimension x="256" y="256"/>
 					</Size>
@@ -148,7 +144,7 @@
 						</Anchor>
 					</Anchors>
 				</Texture>
-				<Texture name="$parentBotRight" file="Interface\AddOns\Accountant\AccountantFrame-BotRight">
+				<Texture name="$parentBotRight" file="Interface\AddOns\Accountant\img\AccountantFrame-BotRight">
 					<Size>
 						<AbsDimension x="128" y="256"/>
 					</Size>
