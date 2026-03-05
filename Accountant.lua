@@ -444,17 +444,19 @@ function Accountant_OnShow()
     local alltotal = 0
     local i = 1
     for char, charvalue in pairs(Accountant_SaveData) do
-      getglobal("AccountantFrameRow" .. i .. "Title"):SetText(char)
-      if Accountant_SaveData[char]["options"]["totalcash"] ~= nil then
-        getglobal("AccountantFrameRow" .. i .. "In"):SetText(
-          Accountant_NiceCash(Accountant_SaveData[char]["options"]["totalcash"])
-        )
-        alltotal = alltotal + Accountant_SaveData[char]["options"]["totalcash"]
-        getglobal("AccountantFrameRow" .. i .. "Out"):SetText(Accountant_SaveData[char]["options"]["date"])
-      else
-        getglobal("AccountantFrameRow" .. i .. "In"):SetText(ACCLOC_UNKNOWN)
+      if char ~= "last_saved" then
+        getglobal("AccountantFrameRow" .. i .. "Title"):SetText(char)
+        if Accountant_SaveData[char]["options"]["totalcash"] ~= nil then
+          getglobal("AccountantFrameRow" .. i .. "In"):SetText(
+            Accountant_NiceCash(Accountant_SaveData[char]["options"]["totalcash"])
+          )
+          alltotal = alltotal + Accountant_SaveData[char]["options"]["totalcash"]
+          getglobal("AccountantFrameRow" .. i .. "Out"):SetText(Accountant_SaveData[char]["options"]["date"])
+        else
+          getglobal("AccountantFrameRow" .. i .. "In"):SetText(ACCLOC_UNKNOWN)
+        end
+        i = i + 1
       end
-      i = i + 1
     end
     AccountantFrameTotalInValue:SetText(Accountant_NiceCash(alltotal))
   end
