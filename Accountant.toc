@@ -8,6 +8,6 @@ l10n\enUS.lua
 l10n\deDE.lua
 l10n\esES.lua
 l10n\frFR.lua
-Accountant.xml
-AccountantButton.xml
-AccountantOptions.xml
+Accountant.lua
+AccountantButton.lua
+AccountantOptions.lua

@@ -13,37 +13,37 @@ Accountant_Player = ""
 local Accountant_RepairAllItems_old
 local Accountant_CursorHasItem_old
 
-function Accountant_RegisterEvents()
-  this:RegisterEvent("MERCHANT_SHOW")
-  this:RegisterEvent("MERCHANT_CLOSED")
+function Accountant_RegisterEvents(frame)
+  frame:RegisterEvent("MERCHANT_SHOW")
+  frame:RegisterEvent("MERCHANT_CLOSED")
 
-  this:RegisterEvent("QUEST_COMPLETE")
-  this:RegisterEvent("QUEST_FINISHED")
+  frame:RegisterEvent("QUEST_COMPLETE")
+  frame:RegisterEvent("QUEST_FINISHED")
 
-  this:RegisterEvent("LOOT_OPENED")
-  this:RegisterEvent("LOOT_CLOSED")
+  frame:RegisterEvent("LOOT_OPENED")
+  frame:RegisterEvent("LOOT_CLOSED")
 
-  this:RegisterEvent("TAXIMAP_OPENED")
-  this:RegisterEvent("TAXIMAP_CLOSED")
+  frame:RegisterEvent("TAXIMAP_OPENED")
+  frame:RegisterEvent("TAXIMAP_CLOSED")
 
-  this:RegisterEvent("TRADE_SHOW")
-  this:RegisterEvent("TRADE_CLOSE")
+  frame:RegisterEvent("TRADE_SHOW")
+  frame:RegisterEvent("TRADE_CLOSE")
 
-  this:RegisterEvent("MAIL_SHOW")
-  this:RegisterEvent("MAIL_CLOSED")
+  frame:RegisterEvent("MAIL_SHOW")
+  frame:RegisterEvent("MAIL_CLOSED")
 
-  this:RegisterEvent("TRAINER_SHOW")
-  this:RegisterEvent("TRAINER_CLOSED")
+  frame:RegisterEvent("TRAINER_SHOW")
+  frame:RegisterEvent("TRAINER_CLOSED")
 
-  this:RegisterEvent("AUCTION_HOUSE_SHOW")
-  this:RegisterEvent("AUCTION_HOUSE_CLOSED")
+  frame:RegisterEvent("AUCTION_HOUSE_SHOW")
+  frame:RegisterEvent("AUCTION_HOUSE_CLOSED")
 
-  this:RegisterEvent("CHAT_MSG_MONEY")
+  frame:RegisterEvent("CHAT_MSG_MONEY")
 
-  this:RegisterEvent("PLAYER_MONEY")
+  frame:RegisterEvent("PLAYER_MONEY")
 
-  this:RegisterEvent("UNIT_NAME_UPDATE")
-  this:RegisterEvent("PLAYER_ENTERING_WORLD")
+  frame:RegisterEvent("UNIT_NAME_UPDATE")
+  frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 
 function Accountant_SetLabels()
@@ -83,8 +83,7 @@ function Accountant_SetLabels()
   end
 
   -- Set the header
-  local name = this:GetName()
-  local header = getglobal(name .. "TitleText")
+  local header = getglobal("AccountantFrameTitleText")
   if header then
     header:SetText(ACCLOC_TITLE .. " " .. Accountant_Version)
   end
@@ -334,7 +333,8 @@ function Accountant_OnEvent(event)
     Accountant_OnShareMoney(event, arg1)
   end
   if Accountant_Verbose and Accountant_Mode ~= oldmode then
-    ACC_Print(ACCLOC_VERBOSE_MODE .. " '" .. Accountant_Mode .. "'")
+    local modeName = Accountant_Mode ~= "" and Accountant_Mode or ACCLOC_OTHER
+    ACC_Print(ACCLOC_VERBOSE_MODE .. " '" .. modeName .. "'")
   end
 end
 
@@ -465,7 +465,7 @@ function Accountant_OnShow()
 end
 
 function Accountant_OnHide()
-  if MYADDONS_ACTIVE_OPTIONSFRAME == this then
+  if MYADDONS_ACTIVE_OPTIONSFRAME == AccountantFrame then
     ShowUIPanel(myAddOnsFrame)
   end
 end
@@ -575,9 +575,9 @@ function Accountant_UpdateLog()
   end
 end
 
-function AccountantTab_OnClick()
-  PanelTemplates_SetTab(AccountantFrame, this:GetID())
-  Accountant_CurrentTab = this:GetID()
+function AccountantTab_OnClick(tab)
+  PanelTemplates_SetTab(AccountantFrame, tab:GetID())
+  Accountant_CurrentTab = tab:GetID()
   PlaySound("igCharacterInfoTab")
   Accountant_OnShow()
 end
@@ -595,3 +595,206 @@ function Accountant_CursorHasItem()
   end
   return Accountant_CursorHasItem_old()
 end
+
+-- ---------------------------------------------------------------------------
+-- Frame Creation
+-- Replaces Accountant.xml. All frames are created at load time.
+-- ---------------------------------------------------------------------------
+
+local function Accountant_CreateFrames()
+  -- Main window
+  local f = CreateFrame("Frame", "AccountantFrame", UIParent)
+  f:SetWidth(384)
+  f:SetHeight(514)
+  f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -104)
+  f:SetToplevel(true)
+  f:EnableMouse(true)
+  f:SetFrameStrata("HIGH")
+  f:SetMovable(true)
+  f:RegisterForDrag("LeftButton")
+  f:Hide()
+
+  f:SetScript("OnDragStart", function()
+    AccountantFrame:StartMoving()
+  end)
+  f:SetScript("OnDragStop", function()
+    AccountantFrame:StopMovingOrSizing()
+  end)
+  f:SetScript("OnMouseUp", function()
+    AccountantFrame:StopMovingOrSizing()
+  end)
+  f:SetScript("OnShow", function()
+    Accountant_OnShow()
+  end)
+  f:SetScript("OnHide", function()
+    Accountant_OnHide()
+  end)
+  f:SetScript("OnEvent", function()
+    Accountant_OnEvent(event)
+  end)
+
+  tinsert(UISpecialFrames, "AccountantFrame")
+  UIPanelWindows["AccountantFrame"] = { area = "left", pushable = 11 }
+
+  Accountant_RegisterEvents(f)
+
+  -- Background portrait texture
+  local portrait = f:CreateTexture("AccountantFramePortrait", "BACKGROUND")
+  portrait:SetWidth(60)
+  portrait:SetHeight(60)
+  portrait:SetPoint("TOPLEFT", f, "TOPLEFT", 7, -6)
+
+  -- Artwork textures
+  local texTopLeft = f:CreateTexture("AccountantFrameTopLeft", "ARTWORK")
+  texTopLeft:SetWidth(256)
+  texTopLeft:SetHeight(256)
+  texTopLeft:SetPoint("TOPLEFT", f, "TOPLEFT")
+  texTopLeft:SetTexture("Interface\\AddOns\\Accountant\\img\\AccountantFrame-TopLeft")
+
+  local texTopRight = f:CreateTexture("AccountantFrameTopRight", "ARTWORK")
+  texTopRight:SetWidth(128)
+  texTopRight:SetHeight(256)
+  texTopRight:SetPoint("TOPRIGHT", f, "TOPRIGHT")
+  texTopRight:SetTexture("Interface\\AddOns\\Accountant\\img\\AccountantFrame-TopRight")
+
+  local texBotLeft = f:CreateTexture("AccountantFrameBotLeft", "ARTWORK")
+  texBotLeft:SetWidth(256)
+  texBotLeft:SetHeight(256)
+  texBotLeft:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -256)
+  texBotLeft:SetTexture("Interface\\AddOns\\Accountant\\img\\AccountantFrame-BotLeft")
+
+  local texBotRight = f:CreateTexture("AccountantFrameBotRight", "ARTWORK")
+  texBotRight:SetWidth(128)
+  texBotRight:SetHeight(256)
+  texBotRight:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -256)
+  texBotRight:SetTexture("Interface\\AddOns\\Accountant\\img\\AccountantFrame-BotRight")
+
+  -- Title text
+  local title = f:CreateFontString("AccountantFrameTitleText", "ARTWORK", "GameFontHighlight")
+  title:SetWidth(300)
+  title:SetHeight(14)
+  title:SetPoint("TOP", f, "TOP", 0, -16)
+
+  -- Column headers
+  local colSource = f:CreateFontString("AccountantFrameSource", "ARTWORK", "GameFontHighlight")
+  colSource:SetPoint("TOPLEFT", f, "TOPLEFT", 24, -93)
+
+  local colIn = f:CreateFontString("AccountantFrameIn", "ARTWORK", "GameFontHighlight")
+  colIn:SetPoint("TOP", f, "TOPLEFT", 204, -93)
+
+  local colOut = f:CreateFontString("AccountantFrameOut", "ARTWORK", "GameFontHighlight")
+  colOut:SetPoint("TOP", f, "TOPLEFT", 295, -93)
+
+  -- Summary labels and values
+  local totalIn = f:CreateFontString("AccountantFrameTotalIn", "ARTWORK", "GameFontHighlightSmall")
+  totalIn:SetPoint("TOPLEFT", f, "TOPLEFT", 75, -39)
+
+  local totalInVal = f:CreateFontString("AccountantFrameTotalInValue", "ARTWORK", "GameFontHighlightSmall")
+  totalInVal:SetPoint("TOPLEFT", f, "TOPLEFT", 163, -39)
+
+  local totalOut = f:CreateFontString("AccountantFrameTotalOut", "ARTWORK", "GameFontHighlightSmall")
+  totalOut:SetPoint("TOPLEFT", f, "TOPLEFT", 75, -55)
+
+  local totalOutVal = f:CreateFontString("AccountantFrameTotalOutValue", "ARTWORK", "GameFontHighlightSmall")
+  totalOutVal:SetPoint("TOPLEFT", f, "TOPLEFT", 163, -55)
+
+  local totalFlow = f:CreateFontString("AccountantFrameTotalFlow", "ARTWORK", "GameFontHighlightSmall")
+  totalFlow:SetPoint("TOPLEFT", f, "TOPLEFT", 75, -71)
+
+  local totalFlowVal = f:CreateFontString("AccountantFrameTotalFlowValue", "ARTWORK", "GameFontHighlightSmall")
+  totalFlowVal:SetPoint("TOPLEFT", f, "TOPLEFT", 163, -71)
+
+  local extra = f:CreateFontString("AccountantFrameExtra", "ARTWORK", "GameFontHighlightSmall")
+  extra:SetPoint("TOP", f, "TOPLEFT", 310, -39)
+
+  local extraVal = f:CreateFontString("AccountantFrameExtraValue", "ARTWORK", "GameFontNormalSmall")
+  extraVal:SetPoint("TOP", extra, "BOTTOM", 0, 0)
+
+  -- Data rows
+  local prevRow = nil
+  for i = 1, 15 do
+    local row = CreateFrame("Frame", "AccountantFrameRow" .. i, f)
+    row:SetWidth(320)
+    row:SetHeight(19)
+    if i == 1 then
+      row:SetPoint("TOPLEFT", f, "TOPLEFT", 21, -111)
+    else
+      row:SetPoint("TOPLEFT", prevRow, "BOTTOMLEFT", 0, -1)
+    end
+
+    local rowTitle = row:CreateFontString("AccountantFrameRow" .. i .. "Title", "BACKGROUND", "GameFontNormal")
+    rowTitle:SetPoint("TOPLEFT", row, "TOPLEFT", 3, -2)
+
+    local rowIn = row:CreateFontString("AccountantFrameRow" .. i .. "In", "BACKGROUND", "GameFontHighlightSmall")
+    rowIn:SetPoint("TOPRIGHT", row, "TOPLEFT", 225, -4)
+
+    local rowOut = row:CreateFontString("AccountantFrameRow" .. i .. "Out", "BACKGROUND", "GameFontHighlightSmall")
+    rowOut:SetPoint("TOPRIGHT", row, "TOPLEFT", 317, -4)
+
+    prevRow = row
+  end
+
+  -- Close button
+  local closeBtn = CreateFrame("Button", "AccountantFrameCloseButton", f, "UIPanelCloseButton")
+  closeBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -30, -8)
+
+  -- Exit button
+  local exitBtn = CreateFrame("Button", "AccountantFrameExitButton", f, "UIPanelButtonTemplate")
+  exitBtn:SetWidth(77)
+  exitBtn:SetHeight(21)
+  exitBtn:SetPoint("BOTTOMRIGHT", texBotRight, "BOTTOMRIGHT", -43, 81)
+  exitBtn:SetText(ACCLOC_EXIT)
+  exitBtn:SetScript("OnClick", function()
+    HideUIPanel(AccountantFrame)
+  end)
+
+  -- Options button
+  local optsBtn = CreateFrame("Button", "AccountantFrameOptionsButton", f, "UIPanelButtonTemplate")
+  optsBtn:SetWidth(80)
+  optsBtn:SetHeight(22)
+  optsBtn:SetPoint("TOPRIGHT", exitBtn, "TOPLEFT", 0, 0)
+  optsBtn:SetText(ACCLOC_OPTBUT)
+  optsBtn:SetScript("OnClick", function()
+    AccountantOptions_Toggle()
+  end)
+
+  -- Reset button
+  local resetBtn = CreateFrame("Button", "AccountantFrameResetButton", f, "UIPanelButtonTemplate")
+  resetBtn:SetWidth(60)
+  resetBtn:SetHeight(22)
+  resetBtn:SetPoint("TOP", f, "TOPLEFT", 310, -62)
+  resetBtn:SetText(ACCLOC_RESET)
+  resetBtn:SetScript("OnClick", function()
+    Accountant_ResetData()
+  end)
+
+  -- Money frame
+  local moneyFrame = CreateFrame("Frame", "AccountantMoneyFrame", f, "SmallMoneyFrameTemplate")
+  moneyFrame:SetPoint("TOPRIGHT", f, "BOTTOMLEFT", 180, 100)
+
+  -- Tabs
+  local tabAnchors = {
+    { point = "BOTTOMLEFT", relativeTo = f, relativePoint = "BOTTOMLEFT", x = 15, y = 46 },
+    { point = "LEFT", relativeTo = nil, relativePoint = "RIGHT", x = -15, y = 0 },
+    { point = "LEFT", relativeTo = nil, relativePoint = "RIGHT", x = -15, y = 0 },
+    { point = "LEFT", relativeTo = nil, relativePoint = "RIGHT", x = -15, y = 0 },
+    { point = "BOTTOMRIGHT", relativeTo = f, relativePoint = "BOTTOMRIGHT", x = -40, y = 46 },
+  }
+  local prevTab = nil
+  for i = 1, 5 do
+    local tab = CreateFrame("Button", "AccountantFrameTab" .. i, f, "CharacterFrameTabButtonTemplate")
+    tab:SetID(i)
+    local a = tabAnchors[i]
+    local relTo = a.relativeTo or prevTab
+    tab:SetPoint(a.point, relTo, a.relativePoint, a.x, a.y)
+    tab:SetScript("OnClick", function()
+      AccountantTab_OnClick(tab)
+    end)
+    prevTab = tab
+  end
+
+  -- Tooltip
+  CreateFrame("GameTooltip", "AccountantTooltip", UIParent, "GameTooltipTemplate")
+end
+
+Accountant_CreateFrames()
