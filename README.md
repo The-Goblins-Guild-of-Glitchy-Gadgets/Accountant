@@ -1,5 +1,8 @@
 # Accountant
 
+[![Version](https://img.shields.io/badge/version-2.3-blue.svg)](https://github.com/The-Goblins-Guild-of-Glitchy-Gadgets/Accountant)
+[![Turtle WoW](https://img.shields.io/badge/Turtle%20WoW-1.18.0-brightgreen.svg)](https://turtlecraft.gg/)
+
 Tracks your incoming and outgoing gold across multiple time periods and categories.
 
 ## Description
