@@ -39,7 +39,7 @@
             </Anchor>
           </Anchors>
         </Texture>
-        <FontString inherits="GameFontNormal" text="ACCOUNTANT_OPTIONS_TITLE">
+        <FontString inherits="GameFontNormal" text="ACCLOC_OPTS">
           <Anchors>
             <Anchor point="TOP" relativeTo="AccountantOptionsFrameHeader">
               <Offset>

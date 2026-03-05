@@ -1,5 +1,5 @@
--- ES Translation, thanks to Bahamut ;)
--- New one
+-- esES locale
+-- Translations: Bahamut
 
 if GetLocale() == "esES" then
   -- Header
@@ -8,7 +8,7 @@ if GetLocale() == "esES" then
   ACCLOC_TOT_OUT = "Gastos Totales"
   ACCLOC_NET = "Ganancia/Perdida Neta"
   ACCLOC_NETLOSS = "Perdida Neta"
-  ACCLOC_NETPROF = "Ganacia Neta"
+  ACCLOC_NETPROF = "Ganancia Neta"
   ACCLOC_SOURCE = "Fuente"
   ACCLOC_IN = "Ingresos"
   ACCLOC_OUT = "Gastos"
@@ -61,8 +61,15 @@ if GetLocale() == "esES" then
   ACCLOC_NEWPROFILE = "Nuevo perfil Contable creado para"
   ACCLOC_LOADPROFILE = "Cargado perfil Contable para"
   ACCLOC_LOADED = "Cargado"
+  ACCLOC_VERBOSE_ON = "Modo Detallado Activado"
+  ACCLOC_VERBOSE_OFF = "Modo Detallado Desactivado"
+  ACCLOC_VERBOSE_MODE = "Modo Contable cambiado a"
+  ACCLOC_GAINED = "Ganado"
+  ACCLOC_LOST = "Perdido"
+  ACCLOC_FROM = "de"
+  ACCLOC_UNKNOWN = "Desconocido"
 
-  -- Key Bindings headers
+  -- Key Bindings
   BINDING_HEADER_ACCOUNTANT = "Contable"
   BINDING_NAME_ACCOUNTANTTOG = "Alternar Contable"
 end

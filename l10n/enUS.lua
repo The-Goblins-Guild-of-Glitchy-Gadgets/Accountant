@@ -1,3 +1,6 @@
+-- enUS locale - default fallback, always loaded unconditionally
+-- Translations: Sabaki
+
 -- Header
 ACCLOC_TITLE = "Accountant"
 ACCLOC_TOT_IN = "Total Incomings"
@@ -55,9 +58,16 @@ ACCLOC_DONE = "Done"
 -- Misc
 ACCLOC_RESET_CONF = "Are you sure you want to reset the"
 ACCLOC_NEWPROFILE = "New Accountant profile created for"
-ACCLOC_LOADPROFILE = "Loaded Accountant Profile for"
+ACCLOC_LOADPROFILE = "Loaded Accountant profile for"
 ACCLOC_LOADED = "Loaded"
+ACCLOC_VERBOSE_ON = "Verbose Mode On"
+ACCLOC_VERBOSE_OFF = "Verbose Mode Off"
+ACCLOC_VERBOSE_MODE = "Accountant mode changed to"
+ACCLOC_GAINED = "Gained"
+ACCLOC_LOST = "Lost"
+ACCLOC_FROM = "from"
+ACCLOC_UNKNOWN = "Unknown"
 
--- Key Bindings headers
+-- Key Bindings
 BINDING_HEADER_ACCOUNTANT = "Accountant"
 BINDING_NAME_ACCOUNTANTTOG = "Toggle Accountant"

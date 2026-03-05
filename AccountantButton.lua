@@ -1,5 +1,3 @@
-ACCOUNTANT_BUTTON_TOOLTIP = "Toggle Accountant"
-
 function AccountantButton_OnClick()
   if AccountantFrame:IsVisible() then
     HideUIPanel(AccountantFrame)
@@ -9,7 +7,7 @@ function AccountantButton_OnClick()
 end
 
 function AccountantButton_Init()
-  if Accountant_SaveData[UnitName("player")]["options"].showbutton then
+  if Accountant_SaveData[Accountant_Player]["options"].showbutton then
     AccountantButtonFrame:Show()
   else
     AccountantButtonFrame:Hide()
@@ -19,19 +17,14 @@ end
 function AccountantButton_Toggle()
   if AccountantButtonFrame:IsVisible() then
     AccountantButtonFrame:Hide()
-    Accountant_SaveData[UnitName("player")]["options"].showbutton = false
+    Accountant_SaveData[Accountant_Player]["options"].showbutton = false
   else
     AccountantButtonFrame:Show()
-    Accountant_SaveData[UnitName("player")]["options"].showbutton = true
+    Accountant_SaveData[Accountant_Player]["options"].showbutton = true
   end
 end
 
 function AccountantButton_UpdatePosition()
-  AccountantButtonFrame:SetPoint(
-    "TOPLEFT",
-    "Minimap",
-    "TOPLEFT",
-    55 - (75 * cos(Accountant_SaveData[UnitName("player")]["options"].buttonpos)),
-    (75 * sin(Accountant_SaveData[UnitName("player")]["options"].buttonpos)) - 55
-  )
+  local pos = Accountant_SaveData[Accountant_Player]["options"].buttonpos
+  AccountantButtonFrame:SetPoint("TOPLEFT", "Minimap", "TOPLEFT", 55 - (75 * cos(pos)), (75 * sin(pos)) - 55)
 end

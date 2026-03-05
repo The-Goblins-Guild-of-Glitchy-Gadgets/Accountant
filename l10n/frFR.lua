@@ -1,4 +1,5 @@
--- FR Translation, thanks to Thi0u ;)
+-- frFR locale
+-- Translations: Thi0u
 
 if GetLocale() == "frFR" then
   -- Header
@@ -6,7 +7,7 @@ if GetLocale() == "frFR" then
   ACCLOC_TOT_IN = "Rentrées Totales"
   ACCLOC_TOT_OUT = "Dépenses Totales"
   ACCLOC_NET = "Bénéfices/Pertes Nettes"
-  ACCLOC_NETLOSS = "Pertes Nettes "
+  ACCLOC_NETLOSS = "Pertes Nettes"
   ACCLOC_NETPROF = "Bénéfices Nets"
   ACCLOC_SOURCE = "Sources"
   ACCLOC_IN = "Rentrées"
@@ -53,15 +54,22 @@ if GetLocale() == "frFR" then
   ACCLOC_WD_THU = "Jeudi"
   ACCLOC_WD_FRI = "Vendredi"
   ACCLOC_WD_SAT = "Samedi"
-  ACCLOC_DONE = "Done"
+  ACCLOC_DONE = "Terminé"
 
   -- Misc
   ACCLOC_RESET_CONF = "Es-tu sur de vouloir réinitialiser la"
   ACCLOC_NEWPROFILE = "Nouveau profil Accountant créé pour"
-  ACCLOC_LOADPROFILE = "Loaded Accountant Profile for"
+  ACCLOC_LOADPROFILE = "Profil Accountant chargé pour"
   ACCLOC_LOADED = "Chargé"
+  ACCLOC_VERBOSE_ON = "Mode Verbeux Activé"
+  ACCLOC_VERBOSE_OFF = "Mode Verbeux Désactivé"
+  ACCLOC_VERBOSE_MODE = "Mode Accountant changé en"
+  ACCLOC_GAINED = "Gagné"
+  ACCLOC_LOST = "Perdu"
+  ACCLOC_FROM = "de"
+  ACCLOC_UNKNOWN = "Inconnu"
 
-  -- Key Bindings headers
+  -- Key Bindings
   BINDING_HEADER_ACCOUNTANT = "Accountant"
   BINDING_NAME_ACCOUNTANTTOG = "Afficher Accountant"
 end

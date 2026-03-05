@@ -1,22 +1,3 @@
---[[
- Accountant
-    By Sabaki (sabaki@gmail.com)
-
-        Updated by: Shadow
-      new codes by Shadow and Rophy
-
-	Tracks you incoming / outgoing cash
-
-        Thanks To:
-	2006/6/18 Rophy: v2.2 Added gold shared by party
-
-	Thanks To:
-	Losimagic, Shrill, Fillet for testing
-	Atlas by Razark for the minimap icon code I lifted
-	Everyone who commented and voted for the mod on curse-gaming.com
-  Thiou for the French loc, Snj & JokerGermany for the German loc
-]]
-
 Accountant_Version = "2.3"
 Accountant_Data = nil
 Accountant_SaveData = nil
@@ -31,6 +12,7 @@ Accountant_LogModes = { "Session", "Day", "Week", "Total" }
 Accountant_Player = ""
 local Accountant_RepairAllItems_old
 local Accountant_CursorHasItem_old
+
 function Accountant_RegisterEvents()
   this:RegisterEvent("MERCHANT_SHOW")
   this:RegisterEvent("MERCHANT_CLOSED")
@@ -93,11 +75,11 @@ function Accountant_SetLabels()
   AccountantFrameTotalFlow:SetText(ACCLOC_NET .. ":")
 
   -- Row Labels (auto generate)
-  InPos = 1
-  for key, value in Accountant_Data do
-    Accountant_Data[key].InPos = InPos
-    getglobal("AccountantFrameRow" .. InPos .. "Title"):SetText(Accountant_Data[key].Title)
-    InPos = InPos + 1
+  local inPos = 1
+  for key, value in pairs(Accountant_Data) do
+    Accountant_Data[key].InPos = inPos
+    getglobal("AccountantFrameRow" .. inPos .. "Title"):SetText(Accountant_Data[key].Title)
+    inPos = inPos + 1
   end
 
   -- Set the header
@@ -150,13 +132,13 @@ function Accountant_OnLoad()
     interruptCinematic = 1,
   }
 
-  -- hooks
+  -- Hooks
   Accountant_RepairAllItems_old = RepairAllItems
   RepairAllItems = Accountant_RepairAllItems
   Accountant_CursorHasItem_old = CursorHasItem
   CursorHasItem = Accountant_CursorHasItem
 
-  -- tabs
+  -- Tabs
   AccountantFrameTab1:SetText(ACCLOC_SESS)
   PanelTemplates_TabResize(10, AccountantFrameTab1)
   AccountantFrameTab2:SetText(ACCLOC_DAY)
@@ -189,8 +171,8 @@ function Accountant_LoadData()
   Accountant_Data["REPAIRS"] = { Title = ACCLOC_REPAIR }
   Accountant_Data["OTHER"] = { Title = ACCLOC_OTHER }
 
-  for key, value in Accountant_Data do
-    for modekey, mode in Accountant_LogModes do
+  for key, value in pairs(Accountant_Data) do
+    for modekey, mode in pairs(Accountant_LogModes) do
       Accountant_Data[key][mode] = { In = 0, Out = 0 }
     end
   end
@@ -199,16 +181,15 @@ function Accountant_LoadData()
     Accountant_SaveData = {}
   end
   if Accountant_SaveData[Accountant_Player] == nil then
-    cdate = date()
+    local cdate = date()
     cdate = string.sub(cdate, 0, 8)
-    cweek = ""
     Accountant_SaveData[Accountant_Player] = {
       options = {
         showbutton = true,
         buttonpos = 0,
         version = Accountant_Version,
         date = cdate,
-        weekdate = cweek,
+        weekdate = "",
         weekstart = 3,
         totalcash = 0,
       },
@@ -219,12 +200,12 @@ function Accountant_LoadData()
     ACC_Print(ACCLOC_LOADPROFILE .. " " .. Accountant_Player)
   end
 
-  order = 1
-  for key, value in Accountant_Data do
+  local order = 1
+  for key, value in pairs(Accountant_Data) do
     if Accountant_SaveData[Accountant_Player]["data"][key] == nil then
       Accountant_SaveData[Accountant_Player]["data"][key] = {}
     end
-    for modekey, mode in Accountant_LogModes do
+    for modekey, mode in pairs(Accountant_LogModes) do
       if Accountant_SaveData[Accountant_Player]["data"][key][mode] == nil then
         Accountant_SaveData[Accountant_Player]["data"][key][mode] = { In = 0, Out = 0 }
       end
@@ -234,7 +215,7 @@ function Accountant_LoadData()
     Accountant_Data[key]["Session"].In = 0
     Accountant_Data[key]["Session"].Out = 0
 
-    -- Old Version Conversion
+    -- Old version data conversion (pre-2.3)
     if Accountant_SaveData[Accountant_Player]["data"][key].TotalIn ~= nil then
       Accountant_SaveData[Accountant_Player]["data"][key]["Total"].In =
         Accountant_SaveData[Accountant_Player]["data"][key].TotalIn
@@ -250,10 +231,12 @@ function Accountant_LoadData()
     if Accountant_SaveData[key] ~= nil then
       Accountant_SaveData[key] = nil
     end
-    -- End OVC
+    -- End old version conversion
+
     Accountant_Data[key].order = order
     order = order + 1
   end
+
   Accountant_SaveData[Accountant_Player]["options"].version = Accountant_Version
   Accountant_SaveData[Accountant_Player]["options"].totalcash = GetMoney()
 
@@ -264,7 +247,7 @@ function Accountant_LoadData()
     Accountant_SaveData[Accountant_Player]["options"]["dateweek"] = Accountant_WeekStart()
   end
   if Accountant_SaveData[Accountant_Player]["options"]["date"] == nil then
-    cdate = date()
+    local cdate = date()
     cdate = string.sub(cdate, 0, 8)
     Accountant_SaveData[Accountant_Player]["options"]["date"] = cdate
   end
@@ -284,10 +267,10 @@ function Accountant_Slash(msg)
   elseif args[1] == "verbose" then
     if Accountant_Verbose == nil then
       Accountant_Verbose = 1
-      ACC_Print("Verbose Mode On")
+      ACC_Print(ACCLOC_VERBOSE_ON)
     else
       Accountant_Verbose = nil
-      ACC_Print("Verbose Mode Off")
+      ACC_Print(ACCLOC_VERBOSE_OFF)
     end
   elseif args[1] == "week" then
     ACC_Print(Accountant_WeekStart())
@@ -319,13 +302,11 @@ function Accountant_OnEvent(event)
   elseif event == "TAXIMAP_OPENED" then
     Accountant_Mode = "TAXI"
   elseif event == "TAXIMAP_CLOSED" then
-    -- Commented out due to taximap closing before money transaction
-    -- Accountant_Mode = "";
+    -- Mode intentionally not cleared: taximap closes before the money transaction fires
   elseif event == "LOOT_OPENED" then
     Accountant_Mode = "LOOT"
   elseif event == "LOOT_CLOSED" then
-    -- Commented out due to loot window closing before money transaction
-    -- Accountant_Mode = "";
+    -- Mode intentionally not cleared: loot window closes before the money transaction fires
   elseif event == "TRADE_SHOW" then
     Accountant_Mode = "TRADE"
   elseif event == "TRADE_CLOSE" then
@@ -333,8 +314,7 @@ function Accountant_OnEvent(event)
   elseif event == "QUEST_COMPLETE" then
     Accountant_Mode = "QUEST"
   elseif event == "QUEST_FINISHED" then
-    -- Commented out due to quest window closing before money transaction
-    -- Accountant_Mode = "";
+    -- Mode intentionally not cleared: quest window closes before the money transaction fires
   elseif event == "MAIL_SHOW" then
     Accountant_Mode = "MAIL"
   elseif event == "MAIL_CLOSED" then
@@ -349,38 +329,25 @@ function Accountant_OnEvent(event)
     Accountant_Mode = ""
   elseif event == "PLAYER_MONEY" then
     Accountant_UpdateLog()
-
-  -- This event is supposed to be fired before PLAYER_MONEY.
+  -- CHAT_MSG_MONEY is expected to fire before PLAYER_MONEY
   elseif event == "CHAT_MSG_MONEY" then
     Accountant_OnShareMoney(event, arg1)
   end
   if Accountant_Verbose and Accountant_Mode ~= oldmode then
-    ACC_Print("Accountant mode changed to '" .. Accountant_Mode .. "'")
+    ACC_Print(ACCLOC_VERBOSE_MODE .. " '" .. Accountant_Mode .. "'")
   end
 end
 
 function Accountant_OnShareMoney(event, arg1)
   local gold, silver, copper, money, oldMode
 
-  -- Parse the message for money gained.
+  -- Parse the message for money gained
   _, _, gold = string.find(arg1, "(%d+) " .. GOLD)
   _, _, silver = string.find(arg1, "(%d+) " .. SILVER)
   _, _, copper = string.find(arg1, "(%d+) " .. COPPER)
-  if gold then
-    gold = tonumber(gold)
-  else
-    gold = 0
-  end
-  if silver then
-    silver = tonumber(silver)
-  else
-    silver = 0
-  end
-  if copper then
-    copper = tonumber(copper)
-  else
-    copper = 0
-  end
+  gold = tonumber(gold) or 0
+  silver = tonumber(silver) or 0
+  copper = tonumber(copper) or 0
   money = copper + silver * 100 + gold * 10000
 
   oldMode = Accountant_Mode
@@ -388,13 +355,13 @@ function Accountant_OnShareMoney(event, arg1)
     Accountant_LastMoney = 0
   end
 
-  -- This will force a money update with calculated amount.
+  -- Force a money update with the calculated shared amount
   Accountant_LastMoney = Accountant_LastMoney - money
   Accountant_Mode = "LOOT"
   Accountant_UpdateLog()
   Accountant_Mode = oldMode
 
-  -- This will suppress the incoming PLAYER_MONEY event.
+  -- Suppress the incoming PLAYER_MONEY event for this amount
   Accountant_LastMoney = Accountant_LastMoney + money
 end
 
@@ -422,55 +389,54 @@ function Accountant_NiceCash(amount)
 end
 
 function Accountant_WeekStart()
-  oneday = 86400
-  ct = time()
-  dt = date("*t", ct)
-  thisDay = dt["wday"]
+  local oneday = 86400
+  local ct = time()
+  local dt = date("*t", ct)
+  local thisDay = dt["wday"]
   while thisDay ~= Accountant_SaveData[Accountant_Player]["options"].weekstart do
     ct = ct - oneday
     dt = date("*t", ct)
     thisDay = dt["wday"]
   end
-  cdate = date(nil, ct)
+  local cdate = date(nil, ct)
   return string.sub(cdate, 0, 8)
 end
 
 function Accountant_OnShow()
   Accountant_SetLabels()
   if Accountant_CurrentTab ~= 5 then
-    TotalIn = 0
-    TotalOut = 0
-    mode = Accountant_LogModes[Accountant_CurrentTab]
-    for key, value in Accountant_Data do
-      row = getglobal("AccountantFrameRow" .. Accountant_Data[key].InPos .. "In")
-      row:SetText(Accountant_NiceCash(Accountant_Data[key][mode].In))
-      TotalIn = TotalIn + Accountant_Data[key][mode].In
-      row = getglobal("AccountantFrameRow" .. Accountant_Data[key].InPos .. "Out")
-      TotalOut = TotalOut + Accountant_Data[key][mode].Out
-      row:SetText(Accountant_NiceCash(Accountant_Data[key][mode].Out))
+    local totalIn = 0
+    local totalOut = 0
+    local mode = Accountant_LogModes[Accountant_CurrentTab]
+    for key, value in pairs(Accountant_Data) do
+      local rowIn = getglobal("AccountantFrameRow" .. Accountant_Data[key].InPos .. "In")
+      rowIn:SetText(Accountant_NiceCash(Accountant_Data[key][mode].In))
+      totalIn = totalIn + Accountant_Data[key][mode].In
+
+      local rowOut = getglobal("AccountantFrameRow" .. Accountant_Data[key].InPos .. "Out")
+      rowOut:SetText(Accountant_NiceCash(Accountant_Data[key][mode].Out))
+      totalOut = totalOut + Accountant_Data[key][mode].Out
     end
 
-    AccountantFrameTotalInValue:SetText(Accountant_NiceCash(TotalIn))
-    AccountantFrameTotalOutValue:SetText(Accountant_NiceCash(TotalOut))
-    if TotalOut > TotalIn then
-      diff = TotalOut - TotalIn
+    AccountantFrameTotalInValue:SetText(Accountant_NiceCash(totalIn))
+    AccountantFrameTotalOutValue:SetText(Accountant_NiceCash(totalOut))
+    if totalOut > totalIn then
+      local diff = totalOut - totalIn
       AccountantFrameTotalFlow:SetText("|cFFFF3333" .. ACCLOC_NETLOSS .. ":")
       AccountantFrameTotalFlowValue:SetText(Accountant_NiceCash(diff))
+    elseif totalOut ~= totalIn then
+      local diff = totalIn - totalOut
+      AccountantFrameTotalFlow:SetText("|cFF00FF00" .. ACCLOC_NETPROF .. ":")
+      AccountantFrameTotalFlowValue:SetText(Accountant_NiceCash(diff))
     else
-      if TotalOut ~= TotalIn then
-        diff = TotalIn - TotalOut
-        AccountantFrameTotalFlow:SetText("|cFF00FF00" .. ACCLOC_NETPROF .. ":")
-        AccountantFrameTotalFlowValue:SetText(Accountant_NiceCash(diff))
-      else
-        AccountantFrameTotalFlow:SetText(ACCLOC_NET)
-        AccountantFrameTotalFlowValue:SetText("")
-      end
+      AccountantFrameTotalFlow:SetText(ACCLOC_NET)
+      AccountantFrameTotalFlowValue:SetText("")
     end
   else
-    -- character totals
+    -- Character totals tab
     local alltotal = 0
     local i = 1
-    for char, charvalue in Accountant_SaveData do
+    for char, charvalue in pairs(Accountant_SaveData) do
       getglobal("AccountantFrameRow" .. i .. "Title"):SetText(char)
       if Accountant_SaveData[char]["options"]["totalcash"] ~= nil then
         getglobal("AccountantFrameRow" .. i .. "In"):SetText(
@@ -479,7 +445,7 @@ function Accountant_OnShow()
         alltotal = alltotal + Accountant_SaveData[char]["options"]["totalcash"]
         getglobal("AccountantFrameRow" .. i .. "Out"):SetText(Accountant_SaveData[char]["options"]["date"])
       else
-        getglobal("AccountantFrameRow" .. i .. "In"):SetText("Unknown")
+        getglobal("AccountantFrameRow" .. i .. "In"):SetText(ACCLOC_UNKNOWN)
       end
       i = i + 1
     end
@@ -509,25 +475,27 @@ function ACC_Print(msg)
 end
 
 function Accountant_ShowUsage()
-  QM_Print("/accountant log\n")
+  ACC_Print("/accountant log")
+  ACC_Print("/accountant verbose")
+  ACC_Print("/accountant week")
 end
 
 function Accountant_ResetData()
-  local type = Accountant_LogModes[Accountant_CurrentTab]
-  if type == "Total" then
-    type = "overall"
+  local resetType = Accountant_LogModes[Accountant_CurrentTab]
+  if resetType == "Total" then
+    resetType = "overall"
   end
-  StaticPopupDialogs["ACCOUNTANT_RESET"].text = ACCLOC_RESET_CONF .. " " .. type .. " " .. ACCLOC_TOTAL .. "?"
-  local dialog = StaticPopup_Show("ACCOUNTANT_RESET", "weeee")
+  StaticPopupDialogs["ACCOUNTANT_RESET"].text = ACCLOC_RESET_CONF .. " " .. resetType .. " " .. ACCLOC_TOTAL .. "?"
+  StaticPopup_Show("ACCOUNTANT_RESET")
 end
 
 function Accountant_ResetConfirmed()
-  local type = Accountant_LogModes[Accountant_CurrentTab]
-  for key, value in Accountant_Data do
-    Accountant_Data[key][type].In = 0
-    Accountant_Data[key][type].Out = 0
-    Accountant_SaveData[Accountant_Player]["data"][key][type].In = 0
-    Accountant_SaveData[Accountant_Player]["data"][key][type].Out = 0
+  local resetType = Accountant_LogModes[Accountant_CurrentTab]
+  for key, value in pairs(Accountant_Data) do
+    Accountant_Data[key][resetType].In = 0
+    Accountant_Data[key][resetType].Out = 0
+    Accountant_SaveData[Accountant_Player]["data"][key][resetType].In = 0
+    Accountant_SaveData[Accountant_Player]["data"][key][resetType].Out = 0
   end
   if AccountantFrame:IsVisible() then
     Accountant_OnShow()
@@ -538,9 +506,9 @@ function Accountant_CheckDate()
   local cdate = date()
   cdate = string.sub(cdate, 0, 8)
 
-  -- 날짜가 바뀌었는지 확인
+  -- Check if the calendar day has changed
   if Accountant_SaveData[Accountant_Player]["options"]["date"] ~= cdate then
-    for mode, value in Accountant_Data do
+    for mode, value in pairs(Accountant_Data) do
       Accountant_Data[mode]["Day"].In = 0
       Accountant_SaveData[Accountant_Player]["data"][mode]["Day"].In = 0
       Accountant_Data[mode]["Day"].Out = 0
@@ -549,9 +517,9 @@ function Accountant_CheckDate()
     Accountant_SaveData[Accountant_Player]["options"]["date"] = cdate
   end
 
-  -- 주간 단위 체크
+  -- Check if the week has rolled over
   if Accountant_SaveData[Accountant_Player]["options"]["dateweek"] ~= Accountant_WeekStart() then
-    for mode, value in Accountant_Data do
+    for mode, value in pairs(Accountant_Data) do
       Accountant_Data[mode]["Week"].In = 0
       Accountant_SaveData[Accountant_Player]["data"][mode]["Week"].In = 0
       Accountant_Data[mode]["Week"].Out = 0
@@ -566,9 +534,10 @@ function Accountant_UpdateLog()
 
   Accountant_CurrentMoney = GetMoney()
   Accountant_SaveData[Accountant_Player]["options"].totalcash = Accountant_CurrentMoney
-  diff = Accountant_CurrentMoney - Accountant_LastMoney
+  local diff = Accountant_CurrentMoney - Accountant_LastMoney
   Accountant_LastMoney = Accountant_CurrentMoney
-  if diff == 0 or diff == nil then
+
+  if diff == nil or diff == 0 then
     return
   end
 
@@ -576,26 +545,27 @@ function Accountant_UpdateLog()
   if mode == "" then
     mode = "OTHER"
   end
+
   if diff > 0 then
-    for key, logmode in Accountant_LogModes do
+    for key, logmode in pairs(Accountant_LogModes) do
       Accountant_Data[mode][logmode].In = Accountant_Data[mode][logmode].In + diff
       Accountant_SaveData[Accountant_Player]["data"][mode][logmode].In = Accountant_Data[mode][logmode].In
     end
     if Accountant_Verbose then
-      ACC_Print("Gained " .. Accountant_NiceCash(diff) .. " from " .. mode)
+      ACC_Print(ACCLOC_GAINED .. " " .. Accountant_NiceCash(diff) .. " " .. ACCLOC_FROM .. " " .. mode)
     end
   elseif diff < 0 then
     diff = diff * -1
-    for key, logmode in Accountant_LogModes do
+    for key, logmode in pairs(Accountant_LogModes) do
       Accountant_Data[mode][logmode].Out = Accountant_Data[mode][logmode].Out + diff
       Accountant_SaveData[Accountant_Player]["data"][mode][logmode].Out = Accountant_Data[mode][logmode].Out
     end
     if Accountant_Verbose then
-      ACC_Print("Lost " .. Accountant_NiceCash(diff) .. " from " .. mode)
+      ACC_Print(ACCLOC_LOST .. " " .. Accountant_NiceCash(diff) .. " " .. ACCLOC_FROM .. " " .. mode)
     end
   end
 
-  -- special case mode resets
+  -- Repair costs are tracked separately but fall under merchant category afterward
   if Accountant_Mode == "REPAIRS" then
     Accountant_Mode = "MERCH"
   end
@@ -612,7 +582,7 @@ function AccountantTab_OnClick()
   Accountant_OnShow()
 end
 
--- hooks
+-- Hooks
 
 function Accountant_RepairAllItems()
   Accountant_Mode = "REPAIRS"
@@ -623,6 +593,5 @@ function Accountant_CursorHasItem()
   if InRepairMode() then
     Accountant_Mode = "REPAIRS"
   end
-  local toret = Accountant_CursorHasItem_old()
-  return toret
+  return Accountant_CursorHasItem_old()
 end

@@ -1,6 +1,6 @@
--- DE Translation, thanks to snj & JokerGermany ;)
--- New one
---
+-- deDE locale
+-- Translations: snj & JokerGermany
+
 if GetLocale() == "deDE" then
   -- Header
   ACCLOC_TITLE = "Accountant"
@@ -60,9 +60,16 @@ if GetLocale() == "deDE" then
   ACCLOC_RESET_CONF = "Die Einstellungen wirklich zuruecksetzen"
   ACCLOC_NEWPROFILE = "Neues Accountant Profil erstellt für"
   ACCLOC_LOADPROFILE = "Accountant Profil geladen für"
-  ACCLOC_LOADED = "Loaded"
+  ACCLOC_LOADED = "Geladen"
+  ACCLOC_VERBOSE_ON = "Ausführlicher Modus An"
+  ACCLOC_VERBOSE_OFF = "Ausführlicher Modus Aus"
+  ACCLOC_VERBOSE_MODE = "Accountant Modus geändert zu"
+  ACCLOC_GAINED = "Erhalten"
+  ACCLOC_LOST = "Verloren"
+  ACCLOC_FROM = "von"
+  ACCLOC_UNKNOWN = "Unbekannt"
 
-  -- Key Bindings headers
+  -- Key Bindings
   BINDING_HEADER_ACCOUNTANT = "Accountant"
   BINDING_NAME_ACCOUNTANTTOG = "Accountant anzeigen/ausblenden"
 end
