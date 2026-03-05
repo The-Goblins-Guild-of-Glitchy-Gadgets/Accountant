@@ -11,6 +11,10 @@ Accountant monitors every copper that enters or leaves your character and sorts 
 
 A character summary tab shows the current gold holdings of every character on your account that has run Accountant, along with when that figure was last updated.
 
+### Nampower Quirks
+
+If you have `nampower >= 3.2.0` installed, Accountant will save your data to a file so it persists despite WoW.exe crashing.
+
 ## Requirements
 
 World of Warcraft client version 1.12.x (vanilla).
