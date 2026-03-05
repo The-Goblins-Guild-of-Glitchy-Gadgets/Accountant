@@ -3,7 +3,7 @@
   Crash-persistent SavedVariables replacement using nampower's file API.
 
   Usage:
-    NampowerDB_Register("Accountant_SaveData", "accountant.lua", {
+    NampowerDB_Register("MyAddon_SaveData", "myaddon.lua", {
       periodic = true,       -- enable periodic writing (default: true)
       interval = 30,         -- seconds between writes (default: 30, minimum: 10)
       events   = {           -- additional events that trigger a write (optional)
