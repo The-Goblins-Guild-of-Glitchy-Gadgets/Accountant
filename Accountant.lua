@@ -154,6 +154,13 @@ function Accountant_OnLoad()
 
   Accountant_CheckDate()
 
+  -- Register with NampowerDB for crash-persistent storage if nampower is available
+  NampowerDB_Register("Accountant_SaveData", "accountant.lua", {
+    periodic = true,
+    interval = 30,
+    events = { "PLAYER_LOGOUT" },
+  })
+
   ACC_Print(ACCLOC_TITLE .. " " .. Accountant_Version .. " " .. ACCLOC_LOADED)
 end
 

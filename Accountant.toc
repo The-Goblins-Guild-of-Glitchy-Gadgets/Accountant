@@ -4,6 +4,7 @@
 ## DefaultState: enabled
 ## SavedVariables: Accountant_SaveData
 
+nampower.lua
 l10n\enUS.lua
 l10n\deDE.lua
 l10n\esES.lua
