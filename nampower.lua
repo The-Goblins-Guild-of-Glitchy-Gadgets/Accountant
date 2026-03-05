@@ -50,50 +50,80 @@ end
 -- Supports strings, numbers, booleans, nil, and nested tables.
 -- ---------------------------------------------------------------------------
 
-local function NampowerDB_Serialize(value, indent)
-  indent = indent or 0
+-- Pre-computed indent strings to avoid string.rep allocations during serialization
+local NampowerDB_Indent = {}
+for i = 0, 20 do
+  NampowerDB_Indent[i] = string.rep("  ", i)
+end
+
+-- Lookup table for boolean serialization to avoid any tostring ambiguity
+local NampowerDB_BoolStr = {}
+NampowerDB_BoolStr[true] = "true"
+NampowerDB_BoolStr[false] = "false"
+
+local function NampowerDB_SerializeValue(value, indent, buf)
   local t = type(value)
 
   if t == "nil" then
-    return "nil"
+    table.insert(buf, "nil")
   elseif t == "boolean" then
-    return tostring(value)
+    table.insert(buf, NampowerDB_BoolStr[value])
   elseif t == "number" then
-    return tostring(value)
+    table.insert(buf, tostring(value) .. "")
   elseif t == "string" then
-    -- Escape backslashes, quotes, newlines, carriage returns, and null bytes
     local escaped = string.gsub(value, "\\", "\\\\")
     escaped = string.gsub(escaped, '"', '\\"')
     escaped = string.gsub(escaped, "\n", "\\n")
     escaped = string.gsub(escaped, "\r", "\\r")
     escaped = string.gsub(escaped, "%z", "\\0")
-    return '"' .. escaped .. '"'
+    table.insert(buf, '"')
+    table.insert(buf, escaped)
+    table.insert(buf, '"')
   elseif t == "table" then
-    local lines = {}
-    local pad = string.rep("  ", indent + 1)
-    local padEnd = string.rep("  ", indent)
+    local pad = NampowerDB_Indent[indent + 1] or string.rep("  ", indent + 1)
+    local padEnd = NampowerDB_Indent[indent] or string.rep("  ", indent)
 
+    -- Check if empty first
+    local empty = true
     for k, v in pairs(value) do
-      local keyStr
-      if type(k) == "string" and string.find(k, "^[%a_][%w_]*$") then
-        keyStr = k
-      elseif type(k) == "number" then
-        keyStr = "[" .. tostring(k) .. "]"
-      else
-        keyStr = "[" .. NampowerDB_Serialize(k, 0) .. "]"
-      end
-      local valStr = NampowerDB_Serialize(v, indent + 1)
-      table.insert(lines, pad .. keyStr .. " = " .. valStr)
+      empty = false
+      break
     end
 
-    if table.getn(lines) == 0 then
-      return "{}"
+    if empty then
+      table.insert(buf, "{}")
+      return
     end
-    return "{\n" .. table.concat(lines, ",\n") .. "\n" .. padEnd .. "}"
+
+    table.insert(buf, "{\n")
+    for k, v in pairs(value) do
+      table.insert(buf, pad)
+      if type(k) == "string" and string.find(k, "^[%a_][%w_]*$") then
+        table.insert(buf, k)
+      elseif type(k) == "number" then
+        table.insert(buf, "[")
+        table.insert(buf, tostring(k) .. "")
+        table.insert(buf, "]")
+      else
+        table.insert(buf, "[")
+        NampowerDB_SerializeValue(k, 0, buf)
+        table.insert(buf, "]")
+      end
+      table.insert(buf, " = ")
+      NampowerDB_SerializeValue(v, indent + 1, buf)
+      table.insert(buf, ",\n")
+    end
+    table.insert(buf, padEnd)
+    table.insert(buf, "}")
   else
-    -- Functions, userdata, threads cannot be serialized
     error("NampowerDB: cannot serialize value of type '" .. t .. "'")
   end
+end
+
+local function NampowerDB_Serialize(value)
+  local buf = {}
+  NampowerDB_SerializeValue(value, 0, buf)
+  return table.concat(buf)
 end
 
 -- ---------------------------------------------------------------------------
@@ -120,9 +150,13 @@ local function NampowerDB_Write(entry)
     error("NampowerDB: serialization failed for '" .. entry.globalName .. "': " .. tostring(result))
   end
 
-  local contents = "NampowerDB_Load(" .. NampowerDB_Serialize(entry.globalName) .. ", " .. result .. ")\n"
+  local contents = "NampowerDB_Load(" .. '"' .. entry.globalName .. '", ' .. result .. ")\n"
 
   WriteCustomFile(entry.filename, contents, "w")
+
+  -- Collect the garbage created by serialization immediately so it doesn't
+  -- accumulate into a large collection that could cause a noticeable hitch
+  collectgarbage()
 end
 
 -- ---------------------------------------------------------------------------
@@ -261,6 +295,9 @@ end
 -- Frame setup — runs at file load time
 -- ---------------------------------------------------------------------------
 
+local NampowerDB_Throttle = 0
+local NampowerDB_THROTTLE_INTERVAL = 1 -- only check once per second
+
 local function NampowerDB_CreateFrame()
   NampowerDB_Frame = CreateFrame("Frame", "NampowerDBFrame", UIParent)
 
@@ -272,11 +309,17 @@ local function NampowerDB_CreateFrame()
     if not NampowerDB_Available then
       return
     end
-    local dt = arg1
+
+    NampowerDB_Throttle = NampowerDB_Throttle + arg1
+    if NampowerDB_Throttle < NampowerDB_THROTTLE_INTERVAL then
+      return
+    end
+    NampowerDB_Throttle = 0
+
     for i = 1, table.getn(NampowerDB_Registry) do
       local entry = NampowerDB_Registry[i]
       if entry.periodic then
-        entry.elapsed = entry.elapsed + dt
+        entry.elapsed = entry.elapsed + NampowerDB_THROTTLE_INTERVAL
         if entry.elapsed >= entry.interval then
           entry.elapsed = 0
           NampowerDB_Write(entry)
