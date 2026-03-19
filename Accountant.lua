@@ -1,4 +1,4 @@
-Accountant_Version = "3.0"
+Accountant_Version = "3.1"
 Accountant_Data = nil
 Accountant_SaveData = nil
 Accountant_Disabled = false
